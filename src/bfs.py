@@ -3,9 +3,10 @@ from collections import deque
 
 import numpy as np
 import pygame
+import psutil
+import os
 
 from .utils import can_move, get_state, is_deadlock, is_solved, print_state
-
 
 def bfs(matrix, player_pos, widget=None, visualizer=False):
 	print('Breadth-First Search')
@@ -62,10 +63,27 @@ def solve_bfs(puzzle, widget=None, visualizer=False):
 	matrix = puzzle
 	where = np.where((matrix == '*') | (matrix == '%'))
 	player_pos = where[0][0], where[1][0]
+	process = psutil.Process(os.getpid())
+	before = process.memory_info().rss / 1024 / 1024
+	after = process.memory_info().rss / 1024 / 1024
+	memory_usage = round(after - before, 2)
+    
+	print(f"Memory Usage: {memory_usage} MB")
+    
+	if widget and visualizer:
+		widget.set_text(
+			f'[BFS] Solution Found!\nMemory Usage: {memory_usage} MB',
+			20
+		)
 	return bfs(matrix, player_pos, widget, visualizer)
 
 	
 if __name__ == '__main__':
 	start = time.time()
-	root = solve_bfs(np.loadtxt('levels/lvl7.dat', dtype='<U1'))
+	process = psutil.Process(os.getpid())
+	before = process.memory_info().rss / 1024 / 1024
+
+	after = process.memory_info().rss / 1024 / 1024
+	root = solve_bfs(np.loadtxt('levels/lvl1.dat', dtype='<U1'))
 	print(f'Runtime: {time.time() - start} seconds')
+	print(f"Total memory used: {after - before:.2f} MB")
