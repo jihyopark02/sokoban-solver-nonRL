@@ -1,7 +1,9 @@
 import time
 from collections import defaultdict
 from heapq import heappop, heappush
-
+import psutil
+import os
+import gc
 import numpy as np
 import pygame
 
@@ -76,7 +78,18 @@ def solve_astar(puzzle, widget=None, visualizer=False, heuristic='manhattan'):
 	matrix = puzzle
 	where = np.where((matrix == '*') | (matrix == '%'))
 	player_pos = where[0][0], where[1][0]
-	return astar(matrix, player_pos, widget, visualizer, heuristic)
+
+	gc.collect()
+	process = psutil.Process(os.getpid())
+	before = process.memory_info().rss / 1024 / 1024
+
+	result = astar(matrix, player_pos, widget, visualizer, heuristic)
+
+	after = process.memory_info().rss / 1024 / 1024
+	memory_usage = after - before
+    
+	print(f"Memory Usage: {memory_usage} MB")
+	return result
 
 	
 if __name__ == '__main__':

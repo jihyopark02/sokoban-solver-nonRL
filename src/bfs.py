@@ -5,6 +5,7 @@ import numpy as np
 import pygame
 import psutil
 import os
+import gc
 
 from .utils import can_move, get_state, is_deadlock, is_solved, print_state
 
@@ -63,10 +64,15 @@ def solve_bfs(puzzle, widget=None, visualizer=False):
 	matrix = puzzle
 	where = np.where((matrix == '*') | (matrix == '%'))
 	player_pos = where[0][0], where[1][0]
+
+	gc.collect()
 	process = psutil.Process(os.getpid())
 	before = process.memory_info().rss / 1024 / 1024
+
+	result = bfs(matrix, player_pos, widget, visualizer)
+
 	after = process.memory_info().rss / 1024 / 1024
-	memory_usage = round(after - before, 2)
+	memory_usage = after - before
     
 	print(f"Memory Usage: {memory_usage} MB")
     
@@ -75,7 +81,8 @@ def solve_bfs(puzzle, widget=None, visualizer=False):
 			f'[BFS] Solution Found!\nMemory Usage: {memory_usage} MB',
 			20
 		)
-	return bfs(matrix, player_pos, widget, visualizer)
+
+	return result
 
 	
 if __name__ == '__main__':
@@ -83,7 +90,9 @@ if __name__ == '__main__':
 	process = psutil.Process(os.getpid())
 	before = process.memory_info().rss / 1024 / 1024
 
-	after = process.memory_info().rss / 1024 / 1024
 	root = solve_bfs(np.loadtxt('levels/lvl1.dat', dtype='<U1'))
+
+	after = process.memory_info().rss / 1024 / 1024
+
 	print(f'Runtime: {time.time() - start} seconds')
-	print(f"Total memory used: {after - before:.2f} MB")
+	print(f"Total memory used: {after - before} MB")

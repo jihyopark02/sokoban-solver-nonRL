@@ -218,7 +218,7 @@ def main():
 	pygame.display.set_icon(displayIcon)
 	window = pygame.display.set_mode((1216, 640))
 	pygame.display.set_caption('Sokoban')
-	level = 1
+	level = 10
 	keep_playing = True
 	random_game = False
 	random_seed = None
